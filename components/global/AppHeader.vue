@@ -42,7 +42,7 @@ onUnmounted(() => {
 	>
 		<nav class="navbar navbar-expand-md p-0 px-3 py-4 px-md-20 py-md-6">
 			<div class="container-fluid justify-content-between p-0">
-				<NuxtLink class="navbar-brand p-0" to="#">
+				<NuxtLink class="navbar-brand p-0" to="/">
 					<img
 						src="@/assets/images/logo-white.svg"
 						alt="logo"
@@ -64,7 +64,7 @@ onUnmounted(() => {
 				<div id="navbar" ref="navbarCollapse" class="collapse navbar-collapse">
 					<ul class="navbar-nav gap-4 ms-auto fw-bold">
 						<li class="nav-item">
-							<NuxtLink to="#" class="nav-link p-4 text-neutral-0">
+							<NuxtLink to="/rooms" class="nav-link p-4 text-neutral-0">
 								客房旅宿
 							</NuxtLink>
 						</li>
@@ -93,7 +93,7 @@ onUnmounted(() => {
 							</div>
 						</li>
 						<li class="d-md-none nav-item">
-							<NuxtLink to="#" class="nav-link p-4 text-neutral-0">
+							<NuxtLink to="/account" class="nav-link p-4 text-neutral-0">
 								會員登入
 							</NuxtLink>
 						</li>
