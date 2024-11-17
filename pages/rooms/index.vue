@@ -29,8 +29,8 @@ const roomImages = computed(() => {
 	const result = rooms.reduce((acc, roomId) => {
 		acc[`room${roomId.toUpperCase()}`] = nums.reduce((obj, num) => {
 			obj[num] = {
-				desktop: importImage(`../assets/images/room-${roomId}-${num}.png`),
-				mobile: importImage(`../assets/images/room-${roomId}-sm-${num}.png`),
+				desktop: importImage(`../../assets/images/room-${roomId}-${num}.png`),
+				mobile: importImage(`../../assets/images/room-${roomId}-sm-${num}.png`),
 			};
 			return obj;
 		}, {});
@@ -173,7 +173,7 @@ const roomImages = computed(() => {
 										class="d-flex justify-content-between align-items-center fs-7 fs-md-5 text-primary-100"
 									>
 										<p class="mb-0 fw-bold">NT$ 10,000</p>
-										<!-- <RouterLink
+										<!-- <RouterLink 
 											:to="{
 												name: 'room-detail',
 												params: {
