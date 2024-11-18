@@ -9,7 +9,7 @@ import { Icon } from "@iconify/vue";
 				class="d-flex flex-column gap-10 gap-md-0 flex-md-row justify-content-md-between align-items-md-center mb-20"
 			>
 				<div>
-					<img class="mb-10" src="@/assets/images/logo-white.svg" alt="logo" />
+					<img class="mb-10" src="/images/logo-white.svg" alt="logo" />
 					<div class="d-flex align-items-center gap-4">
 						<a class="text-neutral-0 border rounded-circle" href="#">
 							<Icon class="p-2 fs-2" icon="bi:line" />

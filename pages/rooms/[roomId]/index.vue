@@ -55,36 +55,16 @@ const handleDateChange = (bookingInfo) => {
 			<div class="d-none d-md-block position-relative">
 				<div class="d-flex gap-2 rounded-3xl overflow-hidden">
 					<div style="width: 52.5vw">
-						<img
-							class="w-100"
-							src="@/assets/images/room-a-1.png"
-							alt="room-a-1"
-						/>
+						<img class="w-100" src="/images/room-a-1.png" alt="room-a-1" />
 					</div>
 					<div class="d-flex flex-wrap gap-md-2" style="width: 42.5vw">
 						<div class="d-flex gap-md-2">
-							<img
-								class="w-50"
-								src="@/assets/images/room-a-2.png"
-								alt="room-a-2"
-							/>
-							<img
-								class="w-50"
-								src="@/assets/images/room-a-3.png"
-								alt="room-a-3"
-							/>
+							<img class="w-50" src="/images/room-a-2.png" alt="room-a-2" />
+							<img class="w-50" src="/images/room-a-3.png" alt="room-a-3" />
 						</div>
 						<div class="d-flex gap-md-2">
-							<img
-								class="w-50"
-								src="@/assets/images/room-a-4.png"
-								alt="room-a-4"
-							/>
-							<img
-								class="w-50"
-								src="@/assets/images/room-a-5.png"
-								alt="room-a-5"
-							/>
+							<img class="w-50" src="/images/room-a-4.png" alt="room-a-4" />
+							<img class="w-50" src="/images/room-a-5.png" alt="room-a-5" />
 						</div>
 					</div>
 				</div>
@@ -97,11 +77,7 @@ const handleDateChange = (bookingInfo) => {
 				</button>
 			</div>
 			<div class="d-md-none position-relative">
-				<img
-					class="img-fluid"
-					src="@/assets/images/room-a-1.png"
-					alt="room-a-1"
-				/>
+				<img class="img-fluid" src="/images/room-a-1.png" alt="room-a-1" />
 				<button
 					class="position-absolute btn btn-primary-10 px-8 py-4 text-primary-100 border-primary-100 fw-bold rounded-3"
 					style="bottom: 23px; right: 12px"
