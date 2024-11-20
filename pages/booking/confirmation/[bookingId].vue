@@ -40,6 +40,12 @@ const { bookingId } = route.params;
 						<button
 							class="btn btn-primary-100 px-md-15 py-4 text-neutral-0 fw-bold border-0 rounded-3"
 							type="button"
+							@click="
+								navigateTo({
+									name: 'user-userId-order',
+									params: { userId: 'me' },
+								})
+							"
 						>
 							前往我的訂單
 						</button>

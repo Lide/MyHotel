@@ -80,7 +80,15 @@ onUnmounted(() => {
 									style="right: 0; left: auto; border-radius: 20px"
 								>
 									<li>
-										<a class="dropdown-item px-6 py-4" href="#">我的帳戶</a>
+										<NuxtLink
+											:to="{
+												name: 'user-userId-profile',
+												params: { userId: 'me' },
+											}"
+											class="dropdown-item px-6 py-4"
+										>
+											我的帳戶
+										</NuxtLink>
 									</li>
 									<li>
 										<a class="dropdown-item px-6 py-4" href="#">登出</a>
@@ -95,7 +103,7 @@ onUnmounted(() => {
 						</li>
 						<li class="nav-item">
 							<NuxtLink
-								to="#"
+								:to="{ name: 'rooms' }"
 								class="btn btn-primary-100 px-8 py-4 text-white fw-bold border-0 rounded-3"
 							>
 								立即訂房
