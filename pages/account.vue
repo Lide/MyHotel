@@ -1,16 +1,10 @@
-<script setup></script>
+<script setup>
+definePageMeta({
+	layout: "account-layout",
+	title: "帳戶",
+});
+</script>
 <template>
-	<div>account</div>
-	<main class="container">
-		<NuxtPage />
-	</main>
+	<NuxtPage />
 </template>
-<style scoped>
-.container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100vh;
-	background-color: aqua;
-}
-</style>
+<style scoped></style>
