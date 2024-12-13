@@ -26,35 +26,16 @@ const slideNext = () => {
 };
 
 const newsList = ref([]);
-const fetchNews = async () => {
-	const { data, error } = await useFetch("api/v1/home/news/", {
-		baseURL: "https://nuxr3.zeabur.app/",
-		onResponse: ({ response }) => {
-			newsList.value = response._data.result;
-		},
-		onResponseError: (error) => {
-			console.log("Response Error:", error);
-		},
-	});
-};
+const { data: newsData } = await useFetch("api/v1/home/news/", {
+	baseURL: "https://nuxr3.zeabur.app/",
+});
+newsList.value = newsData.value.result;
 
 const culinaryList = ref([]);
-const fetchCulinary = async () => {
-	const { data, error } = await useFetch("api/v1/home/culinary/", {
-		baseURL: "https://nuxr3.zeabur.app/",
-		onResponse: ({ response }) => {
-			culinaryList.value = response._data.result;
-		},
-		onResponseError: (error) => {
-			console.log("Response Error:", error);
-		},
-	});
-};
-
-onMounted(() => {
-	fetchNews();
-	fetchCulinary();
+const { data: culinaryData } = await useFetch("api/v1/home/culinary/", {
+	baseURL: "https://nuxr3.zeabur.app/",
 });
+culinaryList.value = culinaryData.value.result;
 </script>
 
 <template>
@@ -127,7 +108,7 @@ onMounted(() => {
 					<div class="col-12 col-md-10 d-flex flex-column gap-10">
 						<div
 							class="card bg-transparent border-0"
-							v-for="(news, index) in newsList.slice(0, 3)"
+							v-for="(news, index) in newsList?.slice(0, 3)"
 							:key="news._id"
 						>
 							<div
