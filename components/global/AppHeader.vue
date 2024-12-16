@@ -29,6 +29,14 @@ onMounted(() => {
 onUnmounted(() => {
 	window.removeEventListener("scroll", handleScroll);
 });
+
+const logout = () => {
+	console.log("logout");
+	// 清除 cookie
+	const cookie = useCookie("auth");
+	cookie.value = "";
+	navigateTo("/");
+};
 </script>
 
 <template>
@@ -91,7 +99,7 @@ onUnmounted(() => {
 										</NuxtLink>
 									</li>
 									<li>
-										<a class="dropdown-item px-6 py-4" href="#">登出</a>
+										<a class="dropdown-item px-6 py-4" @click="logout">登出</a>
 									</li>
 								</ul>
 							</div>
