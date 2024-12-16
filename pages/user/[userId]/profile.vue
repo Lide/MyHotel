@@ -1,4 +1,8 @@
 <script setup>
+definePageMeta({
+	middleware: "auth",
+});
+
 const isEditPassword = ref(false);
 const isEditProfile = ref(false);
 
