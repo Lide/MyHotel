@@ -1,9 +1,125 @@
 <script setup>
-import { ref } from "vue";
-import { RouterLink } from "vue-router";
 import { Icon } from "@iconify/vue";
+const router = useRouter();
+
+const name = ref("");
+const email = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+const phone = ref("");
+const zipcode = ref(0);
+const detail = ref("");
+
+// 設定日期格式
+const selectedYear = ref("");
+const selectedMonth = ref("");
+const selectedDays = ref("");
+const birthday = computed(() => {
+	return `${selectedYear.value}/${selectedMonth.value}/${selectedDays.value}`;
+});
+
+const body = computed(() => ({
+	name: name.value,
+	email: email.value,
+	password: password.value,
+	phone: phone.value,
+	birthday: birthday.value,
+	address: {
+		zipcode: zipcode.value,
+		detail: detail.value,
+	},
+}));
+
+const { execute: fetchSignup } = useFetch("api/v1/user/signup", {
+	baseURL: "https://nuxr3.zeabur.app/",
+	method: "POST",
+	body: body,
+	immediate: false,
+	watch: false,
+	onResponse: ({ response }) => {
+		if (response.status === 200) {
+			console.log("Signup success");
+			alert("註冊成功");
+			// 跳轉到登入頁面
+			router.push("login");
+		} else {
+			console.log("Signup failed:", response._data.message);
+			alert(response._data.message);
+		}
+	},
+});
+
+async function submitSignup() {
+	console.log(body.value);
+	await fetchSignup();
+}
 
 const isEmailAndPasswordValid = ref(false);
+
+const validateEmailAndPassword = () => {
+	const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	if (!emailPattern.test(email.value)) {
+		alert("請輸入有效的電子郵件地址");
+		return;
+	}
+	if (password.value.length < 8) {
+		alert("密碼長度必須至少為8個字符");
+		return;
+	}
+	// 密碼必須包含至少一個字母和一個數字
+	const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+	if (!passwordPattern.test(password.value)) {
+		alert("密碼必須包含至少一個字母和一個數字");
+		return;
+	}
+	if (password.value !== confirmPassword.value) {
+		alert("密碼和確認密碼不一致");
+		return;
+	}
+	// 如果所有驗證都通過，則進行下一步操作
+	isEmailAndPasswordValid.value = true;
+};
+
+const validateOthers = () => {
+	if (name.value === "") {
+		alert("請輸入姓名");
+		return;
+	}
+	if (phone.value === "") {
+		alert("請輸入手機號碼");
+		return;
+	}
+	// 手機號碼格式驗證
+	const phonePattern = /^09\d{8}$/;
+	if (!phonePattern.test(phone.value)) {
+		alert("請輸入有效的手機號碼");
+		return;
+	}
+	if (birthday.value === "") {
+		alert("請選擇生日");
+		return;
+	}
+	// 生日格式驗證
+	const birthdayPattern = /^\d{4}\/\d{1,2}\/\d{1,2}$/;
+	if (!birthdayPattern.test(birthday.value)) {
+		alert("請輸入有效的生日");
+		return;
+	}
+	if (zipcode.value === 0) {
+		alert("請選擇地址");
+		return;
+	}
+	if (detail.value === "") {
+		alert("請輸入詳細地址");
+		return;
+	}
+	if (!document.getElementById("agreementCheck").checked) {
+		alert("請閱讀並同意本網站個資使用規範");
+		return;
+	}
+	// 如果所有驗證都通過，則進行下一步操作
+	submitSignup();
+};
 </script>
 
 <template>
@@ -61,8 +177,9 @@ const isEmailAndPasswordValid = ref(false);
 					<input
 						id="email"
 						class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
-						placeholder="hello@exsample.com"
+						placeholder="請輸入信箱"
 						type="email"
+						v-model="email"
 					/>
 				</div>
 				<div class="mb-4 fs-8 fs-md-7">
@@ -74,6 +191,7 @@ const isEmailAndPasswordValid = ref(false);
 						class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
 						placeholder="請輸入密碼"
 						type="password"
+						v-model="password"
 					/>
 				</div>
 				<div class="mb-10 fs-8 fs-md-7">
@@ -85,12 +203,13 @@ const isEmailAndPasswordValid = ref(false);
 						class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
 						placeholder="請再輸入一次密碼"
 						type="password"
+						v-model="confirmPassword"
 					/>
 				</div>
 				<button
 					class="btn btn-neutral-40 w-100 py-4 text-neutral-60 fw-bold"
 					type="button"
-					@click="isEmailAndPasswordValid = true"
+					@click="validateEmailAndPassword"
 				>
 					下一步
 				</button>
@@ -103,6 +222,7 @@ const isEmailAndPasswordValid = ref(false);
 						class="form-control p-4 text-neutral-100 fw-medium border-neutral-40 rounded-3"
 						placeholder="請輸入姓名"
 						type="text"
+						v-model="name"
 					/>
 				</div>
 				<div class="mb-4 fs-8 fs-md-7">
@@ -114,6 +234,7 @@ const isEmailAndPasswordValid = ref(false);
 						class="form-control p-4 text-neutral-100 fw-medium border-neutral-40 rounded-3"
 						placeholder="請輸入手機號碼"
 						type="tel"
+						v-model="phone"
 					/>
 				</div>
 				<div class="mb-4 fs-8 fs-md-7">
@@ -122,22 +243,25 @@ const isEmailAndPasswordValid = ref(false);
 						<select
 							id="birth"
 							class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+							v-model="selectedYear"
 						>
-							<option
-								v-for="year in 65"
-								:key="year"
-								value="`${year + 1958} 年`"
-							>
+							<option v-for="year in 65" :key="year" :value="year + 1958">
 								{{ year + 1958 }} 年
 							</option>
 						</select>
-						<select class="form-select p-4 text-neutral-80 fw-medium rounded-3">
-							<option v-for="month in 12" :key="month" value="`${month} 月`">
+						<select
+							class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+							v-model="selectedMonth"
+						>
+							<option v-for="month in 12" :key="month" :value="month">
 								{{ month }} 月
 							</option>
 						</select>
-						<select class="form-select p-4 text-neutral-80 fw-medium rounded-3">
-							<option v-for="day in 30" :key="day" value="`${day} 日`">
+						<select
+							class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+							v-model="selectedDays"
+						>
+							<option v-for="day in 30" :key="day" :value="day">
 								{{ day }} 日
 							</option>
 						</select>
@@ -158,10 +282,11 @@ const isEmailAndPasswordValid = ref(false);
 							</select>
 							<select
 								class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+								v-model="zipcode"
 							>
-								<option value="前金區">前金區</option>
-								<option value="鹽埕區">鹽埕區</option>
-								<option selected value="新興區">新興區</option>
+								<option value="101">前金區</option>
+								<option value="102">鹽埕區</option>
+								<option selected value="103">新興區</option>
 							</select>
 						</div>
 						<input
@@ -169,6 +294,7 @@ const isEmailAndPasswordValid = ref(false);
 							type="text"
 							class="form-control p-4 rounded-3"
 							placeholder="請輸入詳細地址"
+							v-model="detail"
 						/>
 					</div>
 				</div>
@@ -189,6 +315,7 @@ const isEmailAndPasswordValid = ref(false);
 				<button
 					class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
 					type="button"
+					@click="validateOthers"
 				>
 					完成註冊
 				</button>
@@ -197,12 +324,12 @@ const isEmailAndPasswordValid = ref(false);
 
 		<p class="mb-0 fs-8 fs-md-7">
 			<span class="me-2 text-neutral-0 fw-medium">已經有會員了嗎？</span>
-			<RouterLink
+			<NuxtLink
 				to="login"
 				class="text-primary-100 fw-bold text-decoration-underline bg-transparent border-0"
 			>
 				<span>立即登入</span>
-			</RouterLink>
+			</NuxtLink>
 		</p>
 	</div>
 </template>

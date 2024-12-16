@@ -1,5 +1,37 @@
 <script setup>
-import { RouterLink } from "vue-router";
+const router = useRouter();
+const email = ref("");
+const password = ref("");
+const body = computed(() => ({
+	email: email.value,
+	password: password.value,
+}));
+
+const { execute: fetchLogin } = useFetch("api/v1/user/login", {
+	baseURL: "https://nuxr3.zeabur.app/",
+	method: "POST",
+	body: body,
+	immediate: false,
+	watch: false,
+	onResponse: ({ response }) => {
+		if (response.status === 200) {
+			console.log("Login success");
+			const cookie = useCookie("auth", {
+				expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+			});
+			cookie.value = response._data.token;
+			// 跳轉到首頁
+			router.push("/");
+		} else {
+			console.log("Login failed:", response._data.message);
+			alert(response._data.message);
+		}
+	},
+});
+
+async function submitLogin() {
+	await fetchLogin();
+}
 </script>
 
 <template>
@@ -19,7 +51,7 @@ import { RouterLink } from "vue-router";
 				<input
 					id="email"
 					class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
-					value="jessica@sample.com"
+					v-model="email"
 					placeholder="請輸入信箱"
 					type="email"
 				/>
@@ -29,7 +61,7 @@ import { RouterLink } from "vue-router";
 				<input
 					id="password"
 					class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
-					value="jessica@sample.com"
+					v-model="password"
 					placeholder="請輸入密碼"
 					type="password"
 				/>
@@ -58,6 +90,7 @@ import { RouterLink } from "vue-router";
 			<button
 				class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
 				type="button"
+				@click="submitLogin"
 			>
 				會員登入
 			</button>
@@ -65,12 +98,12 @@ import { RouterLink } from "vue-router";
 
 		<p class="mb-0 fs-8 fs-md-7">
 			<span class="me-2 text-neutral-0 fw-medium">沒有會員嗎？</span>
-			<RouterLink
+			<NuxtLink
 				to="signup"
 				class="text-primary-100 fw-bold text-decoration-underline bg-transparent border-0"
 			>
 				<span>前往註冊</span>
-			</RouterLink>
+			</NuxtLink>
 		</p>
 	</div>
 </template>

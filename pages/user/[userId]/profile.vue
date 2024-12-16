@@ -1,8 +1,157 @@
 <script setup>
-import { ref } from "vue";
-
 const isEditPassword = ref(false);
 const isEditProfile = ref(false);
+
+const cookie = useCookie("auth");
+
+// 設定日期格式
+const selectedYear = ref(0);
+const selectedMonth = ref(0);
+const selectedDays = ref(0);
+const birthday = computed(() => {
+	return `${selectedYear.value}/${selectedMonth.value}/${selectedDays.value}`;
+});
+
+const { data: userDataResult } = await useFetch(`api/v1/user/`, {
+	baseURL: "https://nuxr3.zeabur.app/",
+	method: "GET",
+	immediate: true,
+	watch: false,
+	headers: {
+		authorization: cookie.value,
+	},
+});
+const userData = ref(userDataResult.value.result);
+
+const { execute: fetchUpdateUser } = useFetch("api/v1/user", {
+	baseURL: "https://nuxr3.zeabur.app/",
+	method: "PUT",
+	body: userData,
+	immediate: false,
+	watch: false,
+	headers: {
+		authorization: cookie.value,
+	},
+	onResponse: ({ response }) => {
+		if (response.status === 200) {
+			alert("儲存成功");
+			isEditProfile.value = false;
+		} else {
+			console.log("Update failed:", response._data.message);
+			alert(response._data.message);
+		}
+	},
+});
+
+const updatePassword = ref({
+	oldPassword: "",
+	newPassword: "",
+	confirmPassword: "",
+});
+
+const updatePasswordData = ref({
+	userId: userData.value._id,
+	oldPassword: updatePassword.value.oldPassword,
+	newPassword: updatePassword.value.newPassword,
+});
+
+// 更新密碼
+const { execute: fetchUpdatePassword } = useFetch("api/v1/user", {
+	baseURL: "https://nuxr3.zeabur.app/",
+	method: "PUT",
+	body: updatePasswordData,
+	immediate: false,
+	watch: false,
+	headers: {
+		authorization: cookie.value,
+	},
+	onResponse: ({ response }) => {
+		if (response.status === 200) {
+			alert("密碼更新成功");
+			isEditPassword.value = false;
+		} else {
+			console.log("Update Password failed:", response._data.message);
+			alert(response._data.message);
+		}
+	},
+});
+
+async function submitUpdateUser() {
+	userData.value.birthday = birthday.value;
+	userData.value.userId = userData.value._id;
+	await fetchUpdateUser();
+}
+
+async function submitUpdatePassword() {
+	if (!checkPassword()) return;
+	await fetchUpdatePassword();
+}
+
+// '1960-02-04T00:00:00.000Z' => '1960 年 02 月 04 日'
+const getBirthdayDesc = () => {
+	const date = new Date(userData.value.birthday);
+	const year = date.getFullYear();
+	// 不足兩位數補 0
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year} 年 ${month} 月 ${day} 日`;
+};
+
+const getBirthdayYear = () => {
+	const date = new Date(userData.value.birthday);
+	return date.getFullYear();
+};
+
+const getBirthdayMonth = () => {
+	const date = new Date(userData.value.birthday);
+	return date.getMonth() + 1;
+};
+
+const getBirthdayDay = () => {
+	const date = new Date(userData.value.birthday);
+	return date.getDate();
+};
+
+selectedYear.value = getBirthdayYear();
+selectedMonth.value = getBirthdayMonth();
+selectedDays.value = getBirthdayDay();
+
+// 密碼檢查
+const checkPassword = () => {
+	if (updatePassword.value.oldPassword === "") {
+		alert("請輸入舊密碼");
+		return false;
+	}
+	if (updatePassword.value.newPassword === "") {
+		alert("請輸入新密碼");
+		return false;
+	}
+	if (updatePassword.value.confirmPassword === "") {
+		alert("請再輸入一次新密碼");
+		return false;
+	}
+	if (
+		updatePassword.value.newPassword !== updatePassword.value.confirmPassword
+	) {
+		alert("新密碼與確認密碼不一致");
+		return false;
+	}
+	if (updatePassword.value.newPassword === updatePassword.value.oldPassword) {
+		alert("新密碼與舊密碼相同");
+		return false;
+	}
+	if (updatePassword.value.newPassword.length < 8) {
+		alert("密碼長度必須至少為8個字符");
+		return false;
+	}
+	// 密碼必須包含至少一個字母和一個數字
+	const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+	if (!passwordPattern.test(updatePassword.value.newPassword)) {
+		alert("密碼必須包含至少一個字母和一個數字");
+		return false;
+	}
+	return true;
+};
 </script>
 
 <template>
@@ -17,7 +166,7 @@ const isEditProfile = ref(false);
 						<p class="mb-2 text-neutral-80 fw-medium">電子信箱</p>
 						<span
 							class="form-control pe-none p-0 text-neutral-100 fw-bold border-0"
-							>Jessica@exsample.com</span
+							>{{ userData.email }}</span
 						>
 					</div>
 
@@ -58,6 +207,7 @@ const isEditProfile = ref(false);
 								type="password"
 								class="form-control p-4 fs-7 rounded-3"
 								placeholder="請輸入舊密碼"
+								v-model="updatePassword.oldPassword"
 							/>
 						</div>
 
@@ -70,6 +220,7 @@ const isEditProfile = ref(false);
 								type="password"
 								class="form-control p-4 fs-7 rounded-3"
 								placeholder="請輸入新密碼"
+								v-model="updatePassword.newPassword"
 							/>
 						</div>
 
@@ -84,6 +235,7 @@ const isEditProfile = ref(false);
 								type="password"
 								class="form-control p-4 fs-7 rounded-3"
 								placeholder="請再輸入一次新密碼"
+								v-model="updatePassword.confirmPassword"
 							/>
 						</div>
 					</div>
@@ -92,6 +244,7 @@ const isEditProfile = ref(false);
 						:class="{ 'd-none': !isEditPassword }"
 						class="btn btn-neutral-40 align-self-md-start px-8 py-4 text-neutral-60 rounded-3"
 						type="button"
+						@click="submitUpdatePassword"
 					>
 						儲存設定
 					</button>
@@ -125,7 +278,7 @@ const isEditProfile = ref(false);
 								'p-4': isEditProfile,
 							}"
 							type="text"
-							value="Jessica Ｗang"
+							v-model="userData.name"
 						/>
 					</div>
 
@@ -149,7 +302,7 @@ const isEditProfile = ref(false);
 								'p-4': isEditProfile,
 							}"
 							type="tel"
-							value="+886 912 345 678"
+							v-model="userData.phone"
 						/>
 					</div>
 
@@ -167,32 +320,31 @@ const isEditProfile = ref(false);
 						<span
 							class="form-control pe-none p-0 text-neutral-100 fw-bold border-0"
 							:class="{ 'd-none': isEditProfile }"
-							>1990 年 8 月 15 日</span
+							>{{ getBirthdayDesc() }}</span
 						>
 						<div class="d-flex gap-2" :class="{ 'd-none': !isEditProfile }">
 							<select
 								id="birth"
 								class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+								v-model="selectedYear"
 							>
-								<option
-									v-for="year in 65"
-									:key="year"
-									value="`${year + 1958} 年`"
-								>
+								<option v-for="year in 65" :key="year" :value="year + 1958">
 									{{ year + 1958 }} 年
 								</option>
 							</select>
 							<select
 								class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+								v-model="selectedMonth"
 							>
-								<option v-for="month in 12" :key="month" value="`${month} 月`">
+								<option v-for="month in 12" :key="month" :value="month">
 									{{ month }} 月
 								</option>
 							</select>
 							<select
 								class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+								v-model="selectedDays"
 							>
-								<option v-for="day in 30" :key="day" value="`${day} 日`">
+								<option v-for="day in 30" :key="day" :value="day">
 									{{ day }} 日
 								</option>
 							</select>
@@ -213,7 +365,7 @@ const isEditProfile = ref(false);
 						<span
 							class="form-control pe-none p-0 text-neutral-100 fw-bold border-0"
 							:class="{ 'd-none': isEditProfile }"
-							>高雄市新興區六角路 123 號</span
+							>{{ userData.address.detail }}</span
 						>
 						<div :class="{ 'd-none': !isEditProfile }">
 							<div class="d-flex gap-2 mb-2">
@@ -237,6 +389,7 @@ const isEditProfile = ref(false);
 								type="text"
 								class="form-control p-4 rounded-3"
 								placeholder="請輸入詳細地址"
+								v-model="userData.address.detail"
 							/>
 						</div>
 					</div>
@@ -254,6 +407,7 @@ const isEditProfile = ref(false);
 					:class="{ 'd-none': !isEditProfile }"
 					class="btn btn-neutral-40 align-self-md-start px-8 py-4 text-neutral-60 rounded-3"
 					type="button"
+					@click="submitUpdateUser"
 				>
 					儲存設定
 				</button>
